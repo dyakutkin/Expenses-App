@@ -7,7 +7,6 @@ from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIV
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from drf_roles.mixins import RoleViewSetMixin
 
 from models import Item
 from serializers import ItemSerializer
@@ -21,7 +20,7 @@ def login_view(request):
         login(request, user)
         return HttpResponse('Cool')
 
-    return redirect(reverse('index'))
+    return HttpResponse('Not cool')
 
 
 class IndexView(TemplateView):
@@ -34,31 +33,20 @@ class RetrieveUpdateDestroyItemView(RetrieveUpdateDestroyAPIView):
     authentication_classes = (BasicAuthentication,)
 
 
-class ListCreateItemView(RoleViewSetMixin, ModelViewSet):
+class ListCreateItemView(ModelViewSet):
     serializer_class = ItemSerializer
 
     def get_queryset(self):
-        print '****user: ', self.request.user
-        return Item.objects.filter(user=self.request.user)
+        queryset = Item.objects.filter(user=self.request.user)
+        if self.request.user.groups.filter(name='admin').exists():
+            queryset = Item.objects.all()
+        elif self.request.user.groups.filter(name='user_manager').exists():
+            queryset = None
+        return queryset
 
     def create(self, serializer):
         data = self.request.data.copy()
         data['user'] = self.request.user.id
-        serializer = self.serializer_class(data=data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(data=serializer.data)
-
-
-class ListCreateItemView1(ListCreateAPIView):
-    serializer_class = ItemSerializer
-
-    def get_queryset(self):
-        return Item.objects.filter(self.request.user)
-
-    def post(self, request):
-        data = request.data.copy()
-        data['user'] = request.user.id
         serializer = self.serializer_class(data=data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()

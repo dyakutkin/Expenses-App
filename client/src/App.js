@@ -2,26 +2,9 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import $ from 'jquery';
-import { Router, Route, hashHistory } from 'react-router'
+import { Router, Route, hashHistory } from 'react-router';
+import {readCookie, getCSRF, isToday} from './utils.js';
 
-function readCookie(name) {
-    var nameEQ = name + "=";
-    var ca = document.cookie.split(';');
-    for(var i = 0; i < ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
-}
-
-function getCSRF() {
-    var csrftoken = readCookie('csrftoken')
-    if (csrftoken == null) {
-        csrftoken = $('#csrf_token').val()
-    }
-    return csrftoken;
-}
 
 var MainContainer = React.createClass({
     getInitialState: function() {
@@ -33,6 +16,12 @@ var MainContainer = React.createClass({
         this.props.authorized = true;
         this.setState({authorized: true});
         this.refs.listView.toggleAuthorization(true);
+        $.get('/core/items/', function (data) {
+            this.refs.listView.setState({items: data});
+            this.setState({items: data});
+            this.refs.listView.forceUpdate();
+        }.bind(this));
+
     },
     render: function() {
         return (
@@ -42,7 +31,7 @@ var MainContainer = React.createClass({
                 </div>
                 <LoginView ref="loginView" handleLogin={this.handleLogin}></LoginView>
                 <p className="App-intro">
-                    <List ref="listView" url='/core/items/' visible={this.state.authorized}/>
+                    <List ref="listView" url='/core/items/' items={this.state.items} visible={this.state.authorized}/>
                 </p>
             </div>
         );
@@ -113,6 +102,17 @@ var List = React.createClass({
             this.setState({items: data});
         }.bind(this));
     },
+    updateSum: function() {
+        var sum = 0;
+        var currentDate = new Date();
+        for (var i = 0; i < this.state.items.length; i++) {
+            var date = new Date(this.state.items[i].date);
+            if (isToday(date)) {
+                sum += this.state.items[i].cost;
+            }
+        }
+        this.setState({sum: sum});
+    },
     toggleAuthorization: function(authorized) {
         this.setState({visible: authorized});
     },
@@ -139,15 +139,25 @@ var List = React.createClass({
             }
         }
     },
+    handleLimitChange: function(e) {
+        this.setState({limit: e.target.value});
+    },
     render: function() {
         var listItems = this.state.items.map(function(listItem) {
             return (
                 <ListItem data={listItem} handleItemRemove={this.handleItemRemove}/>
             );
         }.bind(this));
+        this.updateSum();
         return (
             <ul className={this.state.visible? '': 'hidden'}>
                 <button onClick={this.handleAddItem}>Add Item</button>
+                <p></p>
+                <div className={this.state.sum > this.state.limit? 'limit_red': 'limit_green'}>
+                    Day limit: <input type="text" name="limit" value={this.state.limit} onChange={this.handleLimitChange}/>
+                </div>
+                <p></p>
+                Sum: {this.state.sum}
                 <p></p>
                 {listItems}
             </ul>
