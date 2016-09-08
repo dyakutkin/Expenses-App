@@ -33,4 +33,16 @@ function isToday(date) {
     return true;
 }
 
-export {readCookie, getCSRF, isToday};
+function getItemsCostSum(items) {
+    var sum = 0;
+    var currentDate = new Date();
+    for (var i = 0; i < items.length; i++) {
+        var date = new Date(items[i].date);
+        if (isToday(date)) {
+            sum += parseInt(items[i].cost);
+        }
+    }
+    return sum;
+}
+
+export {readCookie, getCSRF, isToday, getItemsCostSum};

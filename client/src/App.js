@@ -3,7 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 import $ from 'jquery';
 import { Router, Route, hashHistory } from 'react-router';
-import {readCookie, getCSRF, isToday} from './utils.js';
+import {readCookie, getCSRF, isToday, getItemsCostSum} from './utils.js';
 
 var App = React.createClass( {
     render: function() {
@@ -14,7 +14,6 @@ var App = React.createClass( {
         );
     }
 })
-
 
 var LoginView = React.createClass({
     getInitialState: function() {
@@ -64,12 +63,17 @@ var Expenses = React.createClass({
         return {
             authorized: false,
             sending: false,
-            items: []
+            items: [],
+            sum: 0
         };
+    },
+    updateSum: function() {
+        var sum = getItemsCostSum(this.state.items);
+        this.setState({sum: sum});
     },
     handleLogin: function(e) {
         $.get(this.listLink, function (data) {
-            this.setState({items: data, authorized: true});
+            this.setState({items: data, authorized: true, sum: getItemsCostSum(data)});
         }.bind(this));
     },
     addItem: function() {
@@ -93,6 +97,7 @@ var Expenses = React.createClass({
             if (item.id == items[i].id) {
                 items.splice(i, 1);
                 this.setState({items: items});
+                this.updateSum();
                 $.ajax({
                     url: this.detailLink + item.id,
                     type: 'DELETE'
@@ -108,21 +113,20 @@ var Expenses = React.createClass({
                 items[i][key] = value;
                 item = items[i];
                 this.setState({items: items});
+                this.updateSum();
             }
         }
         if (!this.state.sending) {
             this.setState({sending: true});
             var csrfToken = readCookie('csrftoken');
-            setTimeout(function() {
-                $.ajax({
-                    url: this.detailLink + id,
-                    type: 'PATCH',
-                    data: item,
-                    success: function(result) {
-                        this.setState({sending: false});
-                    }.bind(this)
-                });
-            }.bind(this), 2000);
+            $.ajax({
+                url: this.detailLink + id,
+                type: 'PATCH',
+                data: item,
+                success: function(result) {
+                    this.setState({sending: false});
+                }.bind(this)
+            });
         }
     },
     render: function() {
@@ -139,6 +143,7 @@ var Expenses = React.createClass({
                         addItem={this.addItem.bind(this)}
                         updateItem={this.updateItem.bind(this)}
                         items={this.state.items}
+                        sum={this.state.sum}
                         visible={this.state.authorized}/>
                 </p>
             </div>
@@ -148,19 +153,7 @@ var Expenses = React.createClass({
 
 var List = React.createClass({
     getInitialState: function() {
-        return {};
-    },
-    getSum: function() {
-        var sum = 0;
-        var currentDate = new Date();
-        for (var i = 0; i < this.props.items.length; i++) {
-            var date = new Date(this.props.items[i].date);
-            if (isToday(date)) {
-                sum += parseInt(this.props.items[i].cost);
-            }
-        }
-        this.setState({sum: sum});
-        return sum;
+        return {limit: 0, edit: false};
     },
     handleLimitChange: function(e) {
         this.setState({limit: e.target.value});
@@ -175,11 +168,13 @@ var List = React.createClass({
             <div>
                 <button onClick={this.props.addItem}>Add Item</button>
                 <p></p>
-                <div className={this.state.sum > this.state.limit? 'limit_red': 'limit_green'}>
-                    Day limit: <input type="text" name="limit" value={this.state.limit} onChange={this.handleLimitChange}/>
+                <div className={this.props.sum > this.state.limit? 'limit_red': 'limit_green'}>
+                    Day limit: <span>{this.state.limit}</span>
+                    <input className={this.state.edit? '': 'hidden'} type="number" name="limit" onBlur={this.handleLimitChange}/>
+                    <input type="button" name="edit" value="edit" onClick={()=> this.setState({edit: !this.state.edit})}/>
                 </div>
                 <p></p>
-                Sum: {this.getSum()}
+                Sum: {this.props.sum}
                 <p></p>
                 {listItems}
             </div>
@@ -189,10 +184,7 @@ var List = React.createClass({
 
 var ListItem = React.createClass({
     getInitialState: function() {
-        var data = this.props.data;
-        data.url = "/core/item/" + data.id;
-        data.sending = false;
-        return data;
+        return {edit: false};
     },
     handleUpdate: function(e) {
         this.props.updateItem(this.props.data.id, e.target.name, e.target.value);
@@ -205,11 +197,20 @@ var ListItem = React.createClass({
             <div>
                 <li>
                 <p>
-                <form method="PUT">
-                    <input type="date" name="date" value={this.props.data.date} onChange={this.handleUpdate}/>
-                    <input type="time" name="time" value={this.props.data.time} onChange={this.handleUpdate}/>
-                    <input type="text" name="text" value={this.props.data.text} onChange={this.handleUpdate}/>
-                    <input type="number" name="cost" value={this.props.data.cost} onChange={this.handleUpdate}/>
+                <form>
+                    <span>Date: {this.props.data.date}</span>
+                    <input className={this.state.edit? '': 'hidden'} type="date" name="date" onBlur={this.handleUpdate}/>
+                    <p></p>
+                    <span>Time: {this.props.data.time}</span>
+                    <input className={this.state.edit? '': 'hidden'} type="time" name="time" onBlur={this.handleUpdate}/>
+                    <p></p>
+                    <span>Text: {this.props.data.text}</span>
+                    <input className={this.state.edit? '': 'hidden'} type="text" name="text" onBlur={this.handleUpdate}/>
+                    <p></p>
+                    <span>Cost: {this.props.data.cost}</span>
+                    <input className={this.state.edit? '': 'hidden'} type="number" name="cost" onBlur={this.handleUpdate}/>
+                    <p></p>
+                    <input type="button" name="edit" value="edit" onClick={()=> this.setState({edit: !this.state.edit})}/>
                     <input type="button" name="delete" value="x" onClick={this.handleDelete}/>
                 </form>
                 </p>
