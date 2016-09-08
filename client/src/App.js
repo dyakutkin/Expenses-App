@@ -5,48 +5,16 @@ import $ from 'jquery';
 import { Router, Route, hashHistory } from 'react-router';
 import {readCookie, getCSRF, isToday} from './utils.js';
 
-
-var MainContainer = React.createClass({
-    getInitialState: function() {
-        return {
-            authorized: false,
-        };
-    },
-    handleLogin: function(e) {
-        this.props.authorized = true;
-        this.setState({authorized: true});
-        this.refs.listView.toggleAuthorization(true);
-        $.get('/core/items/', function (data) {
-            this.refs.listView.setState({items: data});
-            this.setState({items: data});
-            this.refs.listView.forceUpdate();
-        }.bind(this));
-
-    },
-    render: function() {
-        return (
-            <div className="App">
-                <div className="App-header">
-                    <h2>Expenses</h2>
-                </div>
-                <LoginView ref="loginView" handleLogin={this.handleLogin}></LoginView>
-                <p className="App-intro">
-                    <List ref="listView" url='/core/items/' items={this.state.items} visible={this.state.authorized}/>
-                </p>
-            </div>
-        );
-    }
-});
-
 var App = React.createClass( {
     render: function() {
         return (
             <Router history={hashHistory}>
-                <Route path="/" component={MainContainer}/>
+                <Route path="/" component={Expenses}/>
             </Router>
         );
     }
 })
+
 
 var LoginView = React.createClass({
     getInitialState: function() {
@@ -89,81 +57,135 @@ var LoginView = React.createClass({
     }
 });
 
-
-var List = React.createClass({
+var Expenses = React.createClass({
+    listLink: '/core/items/',
+    detailLink: '/core/item/',
     getInitialState: function() {
         return {
-            items: [],
-            visible: false
+            authorized: false,
+            sending: false,
+            items: []
         };
     },
-    componentDidMount: function() {
-        $.get(this.props.url, function (data) {
-            this.setState({items: data});
+    handleLogin: function(e) {
+        $.get(this.listLink, function (data) {
+            this.setState({items: data, authorized: true});
         }.bind(this));
     },
-    updateSum: function() {
-        var sum = 0;
-        var currentDate = new Date();
-        for (var i = 0; i < this.state.items.length; i++) {
-            var date = new Date(this.state.items[i].date);
-            if (isToday(date)) {
-                sum += this.state.items[i].cost;
-            }
-        }
-        this.setState({sum: sum});
-    },
-    toggleAuthorization: function(authorized) {
-        this.setState({visible: authorized});
-    },
-    handleAddItem: function() {
+    addItem: function() {
         var csrfToken = readCookie('csrftoken');
         $.ajax({
             beforeSend: function(xhr) {
                 xhr.setRequestHeader('X-CSRFToken', csrfToken);
             }.bind(this),
-            url: this.props.url,
+            url: this.listLink,
             type: 'POST',
             success: function(result) {
-                this.state.items.push(result);
-                this.forceUpdate();
+                var items = this.state.items;
+                items.push(result);
+                this.setState({items: items});
             }.bind(this)
         });
     },
-    handleItemRemove: function(item) {
-        for(var i = 0; i < this.state.items.length; i++) {
-            if (item.id == this.state.items[i].id) {
-                this.state.items.splice(i, 1);
-                this.forceUpdate();
-                return;
+    removeItem: function(item) {
+        var items = this.state.items;
+        for(var i = 0; i < items.length; i++) {
+            if (item.id == items[i].id) {
+                items.splice(i, 1);
+                this.setState({items: items});
+                $.ajax({
+                    url: this.detailLink + item.id,
+                    type: 'DELETE'
+                });
             }
         }
+    },
+    updateItem: function(id, key, value) {
+        var items = this.state.items;
+        var item = null;
+        for(var i = 0; i < items.length; i++) {
+            if (id == items[i].id) {
+                items[i][key] = value;
+                item = items[i];
+                this.setState({items: items});
+            }
+        }
+        if (!this.state.sending) {
+            this.setState({sending: true});
+            var csrfToken = readCookie('csrftoken');
+            setTimeout(function() {
+                $.ajax({
+                    url: this.detailLink + id,
+                    type: 'PATCH',
+                    data: item,
+                    success: function(result) {
+                        this.setState({sending: false});
+                    }.bind(this)
+                });
+            }.bind(this), 2000);
+        }
+    },
+    render: function() {
+        return (
+            <div className="App">
+                <div className="App-header">
+                    <h2>Expenses</h2>
+                </div>
+                <LoginView ref="loginView" handleLogin={this.handleLogin}></LoginView>
+                <p className="App-intro">
+                    <List
+                        className={this.state.authorized? '': 'hidden'}
+                        removeItem={this.removeItem.bind(this)}
+                        addItem={this.addItem.bind(this)}
+                        updateItem={this.updateItem.bind(this)}
+                        items={this.state.items}
+                        visible={this.state.authorized}/>
+                </p>
+            </div>
+        );
+    }
+});
+
+var List = React.createClass({
+    getInitialState: function() {
+        return {};
+    },
+    getSum: function() {
+        var sum = 0;
+        var currentDate = new Date();
+        for (var i = 0; i < this.props.items.length; i++) {
+            var date = new Date(this.props.items[i].date);
+            if (isToday(date)) {
+                sum += parseInt(this.props.items[i].cost);
+            }
+        }
+        this.setState({sum: sum});
+        return sum;
     },
     handleLimitChange: function(e) {
         this.setState({limit: e.target.value});
     },
     render: function() {
-        var listItems = this.state.items.map(function(listItem) {
+        var listItems = this.props.items.map(function(listItem) {
             return (
-                <ListItem data={listItem} handleItemRemove={this.handleItemRemove}/>
+                <ListItem data={listItem} removeItem={this.props.removeItem} updateItem={this.props.updateItem}/>
             );
         }.bind(this));
-        this.updateSum();
         return (
-            <ul className={this.state.visible? '': 'hidden'}>
-                <button onClick={this.handleAddItem}>Add Item</button>
+            <div>
+                <button onClick={this.props.addItem}>Add Item</button>
                 <p></p>
                 <div className={this.state.sum > this.state.limit? 'limit_red': 'limit_green'}>
                     Day limit: <input type="text" name="limit" value={this.state.limit} onChange={this.handleLimitChange}/>
                 </div>
                 <p></p>
-                Sum: {this.state.sum}
+                Sum: {this.getSum()}
                 <p></p>
                 {listItems}
-            </ul>
+            </div>
         );
     }
-})
+});
 
 var ListItem = React.createClass({
     getInitialState: function() {
@@ -173,40 +195,21 @@ var ListItem = React.createClass({
         return data;
     },
     handleUpdate: function(e) {
-        var targetState = {};
-        targetState[e.target.name] = e.target.value;
-        this.setState(targetState);
-        if (!this.state.sending) {
-            this.setState({sending: true});
-            setTimeout(function() {
-                $.ajax({
-                    url: this.state.url,
-                    type: 'PUT',
-                    data: this.state,
-                    success: function(result) {
-                        this.setState({sending: false});
-                    }.bind(this)
-                });
-            }.bind(this), 2000);
-        }
+        this.props.updateItem(this.props.data.id, e.target.name, e.target.value);
     },
     handleDelete: function(e) {
-        this.props.handleItemRemove(this.state);
-        $.ajax({
-            url: this.state.url,
-            type: 'DELETE'
-        });
+        this.props.removeItem(this.props.data);
     },
     render: function() {
         return (
             <div>
                 <li>
                 <p>
-                <form action={"/core/item/" + this.state.id} method="PUT">
-                    <input type="date" name="date" value={this.state.date} onChange={this.handleUpdate}/>
-                    <input type="time" name="time" value={this.state.time} onChange={this.handleUpdate}/>
-                    <input type="text" name="text" value={this.state.text} onChange={this.handleUpdate}/>
-                    <input type="number" name="cost" value={this.state.cost} onChange={this.handleUpdate}/>
+                <form method="PUT">
+                    <input type="date" name="date" value={this.props.data.date} onChange={this.handleUpdate}/>
+                    <input type="time" name="time" value={this.props.data.time} onChange={this.handleUpdate}/>
+                    <input type="text" name="text" value={this.props.data.text} onChange={this.handleUpdate}/>
+                    <input type="number" name="cost" value={this.props.data.cost} onChange={this.handleUpdate}/>
                     <input type="button" name="delete" value="x" onClick={this.handleDelete}/>
                 </form>
                 </p>
