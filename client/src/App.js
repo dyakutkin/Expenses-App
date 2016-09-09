@@ -58,11 +58,11 @@ var LoginView = React.createClass({
 
 var Expenses = React.createClass({
     listLink: '/core/items/',
+    filterLink: '/core/items/filter/',
     detailLink: '/core/item/',
     getInitialState: function() {
         return {
             authorized: false,
-            sending: false,
             items: [],
             sum: 0
         };
@@ -76,11 +76,17 @@ var Expenses = React.createClass({
             this.setState({items: data, authorized: true, sum: getItemsCostSum(data)});
         }.bind(this));
     },
+    filterItems: function(filterState) {
+        $.get(this.filterLink, filterState,
+            function (data) {
+                this.setState({items: data, sum: getItemsCostSum(data)});
+            }.bind(this)
+        );
+    },
     addItem: function() {
-        var csrfToken = readCookie('csrftoken');
         $.ajax({
             beforeSend: function(xhr) {
-                xhr.setRequestHeader('X-CSRFToken', csrfToken);
+                xhr.setRequestHeader('X-CSRFToken', readCookie('csrftoken'));
             }.bind(this),
             url: this.listLink,
             type: 'POST',
@@ -112,29 +118,21 @@ var Expenses = React.createClass({
             if (id == items[i].id) {
                 items[i][key] = value;
                 item = items[i];
-                this.setState({items: items});
-                this.updateSum();
+                $.ajax({
+                    url: this.detailLink + id,
+                    type: 'PATCH',
+                    data: item,
+                    success: function(result) {
+                        this.setState({items: items});
+                        this.updateSum();
+                    }.bind(this)
+                });
             }
-        }
-        if (!this.state.sending) {
-            this.setState({sending: true});
-            var csrfToken = readCookie('csrftoken');
-            $.ajax({
-                url: this.detailLink + id,
-                type: 'PATCH',
-                data: item,
-                success: function(result) {
-                    this.setState({sending: false});
-                }.bind(this)
-            });
         }
     },
     render: function() {
         return (
             <div className="App">
-                <div className="App-header">
-                    <h2>Expenses</h2>
-                </div>
                 <LoginView ref="loginView" handleLogin={this.handleLogin}></LoginView>
                 <p className="App-intro">
                     <List
@@ -142,6 +140,7 @@ var Expenses = React.createClass({
                         removeItem={this.removeItem.bind(this)}
                         addItem={this.addItem.bind(this)}
                         updateItem={this.updateItem.bind(this)}
+                        filterItems={this.filterItems.bind(this)}
                         items={this.state.items}
                         sum={this.state.sum}
                         visible={this.state.authorized}/>
@@ -153,10 +152,22 @@ var Expenses = React.createClass({
 
 var List = React.createClass({
     getInitialState: function() {
-        return {limit: 0, edit: false};
+        return {
+            limit: 0, edit: false, filter: false,
+            filter_args: {
+                'date_from': null,
+                'date_to': null,
+                'time_from': null,
+                'time_to': null
+            }};
     },
     handleLimitChange: function(e) {
         this.setState({limit: e.target.value});
+    },
+    handleFilterChange: function(e) {
+        var currentFilterState = this.state.filter_args;
+        currentFilterState[e.target.name] = e.target.value;
+        this.props.filterItems(currentFilterState);
     },
     render: function() {
         var listItems = this.props.items.map(function(listItem) {
@@ -172,6 +183,15 @@ var List = React.createClass({
                     Day limit: <span>{this.state.limit}</span>
                     <input className={this.state.edit? '': 'hidden'} type="number" name="limit" onBlur={this.handleLimitChange}/>
                     <input type="button" name="edit" value="edit" onClick={()=> this.setState({edit: !this.state.edit})}/>
+
+                    <div className={this.state.filter? '': 'hidden'}>
+                        <input type="date" name="date_from" onChange={this.handleFilterChange}/>
+                        <input type="date" name="date_from" onChange={this.handleFilterChange}/>
+                        <input type="time" name="time_from" onChange={this.handleFilterChange}/>
+                        <input type="time" name="time_to" onChange={this.handleFilterChange}/>
+                    </div>
+                    <input type="button" name="filter" value="filter"
+                            onClick={()=> this.setState({filter: !this.state.filter})}/>
                 </div>
                 <p></p>
                 Sum: {this.props.sum}
