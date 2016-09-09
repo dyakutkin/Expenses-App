@@ -22,7 +22,8 @@ def login_view(request):
         password=request.POST.get('password'))
     if user:
         login(request, user)
-        return HttpResponse()
+        return HttpResponse(status=200)
+    return HttpResponse(status=400)
 
 
 class IndexView(TemplateView):
@@ -51,30 +52,32 @@ class ListCreateItemView(PermittedItemsQuerysetMixin, ModelViewSet):
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(data=serializer.data)
+        return HttpResponse(status=400)
 
 
 class FilteredItemsView(PermittedItemsQuerysetMixin, APIView):
     def get(self, request):
         filter_serializer = ItemFilterSerializer(data=request.GET)
-        if filter_serializer.is_valid(raise_exception=True):
-            filters = Q()
+        filter_serializer.is_valid(raise_exception=True)
 
-            date_from = filter_serializer.validated_data.get('date_from')
-            if date_from:
-                filters &= Q(date__gte=date_from)
+        filters = Q()
 
-            date_to = filter_serializer.validated_data.get('date_to')
-            if date_to:
-                filters &= Q(date__lte=date_to)
+        date_from = filter_serializer.validated_data.get('date_from')
+        if date_from:
+            filters &= Q(date__gte=date_from)
 
-            time_from = filter_serializer.validated_data.get('time_from')
-            if time_from:
-                filters &= Q(time__gte=time_from)
+        date_to = filter_serializer.validated_data.get('date_to')
+        if date_to:
+            filters &= Q(date__lte=date_to)
 
-            time_to = filter_serializer.validated_data.get('time_to')
-            if time_to:
-                filters &= Q(time__lte=time_to)
+        time_from = filter_serializer.validated_data.get('time_from')
+        if time_from:
+            filters &= Q(time__gte=time_from)
 
-            queryset = Item.objects.filter(filters)
-            items_serializer = ItemSerializer(queryset, many=True)
-            return Response(data=items_serializer.data)
+        time_to = filter_serializer.validated_data.get('time_to')
+        if time_to:
+            filters &= Q(time__lte=time_to)
+
+        queryset = Item.objects.filter(filters)
+        items_serializer = ItemSerializer(queryset, many=True)
+        return Response(data=items_serializer.data)
