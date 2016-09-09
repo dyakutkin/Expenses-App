@@ -28,7 +28,6 @@ var LoginView = React.createClass({
         this.setState(targetState);
     },
     handleSubmit: function() {
-        this.props.handleLogin();
         $.ajax({
             crossDomain: true,
             xhrFields: {
@@ -42,6 +41,7 @@ var LoginView = React.createClass({
             data: this.state,
             success: function(result) {
                 this.setState({authorized: true});
+                this.props.handleLogin();
             }.bind(this)
         });
     },
