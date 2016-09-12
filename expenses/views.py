@@ -5,8 +5,6 @@ from django.shortcuts import HttpResponse
 from django.db.models import Q
 
 from rest_framework import status
-from rest_framework.authentication import BasicAuthentication
-from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
@@ -37,13 +35,7 @@ class UsersView(ModelViewSet):
     permission_classes = [UserManagementPermission]
 
 
-class RetrieveUpdateDestroyExpenseView(RetrieveUpdateDestroyAPIView):
-    queryset = Expense.objects.all()
-    serializer_class = ExpenseSerializer
-    authentication_classes = (BasicAuthentication,)
-
-
-class ListCreateItemView(PermittedExpensesQuerysetMixin, ModelViewSet):
+class ExpensesView(PermittedExpensesQuerysetMixin, ModelViewSet):
     serializer_class = ExpenseSerializer
 
     def create(self, serializer):

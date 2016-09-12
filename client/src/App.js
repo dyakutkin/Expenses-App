@@ -18,7 +18,7 @@ var App = React.createClass( {
 var LoginView = React.createClass({
     getInitialState: function() {
         return {
-            url: '/expenses/login/',
+            url: '/login/',
             authorized: false
         };
     },
@@ -28,7 +28,6 @@ var LoginView = React.createClass({
         this.setState(targetState);
     },
     handleSubmit: function() {
-        console.log('worker');
         $.ajax({
             crossDomain: true,
             xhrFields: {
@@ -60,9 +59,8 @@ var LoginView = React.createClass({
 });
 
 var Expenses = React.createClass({
-    listLink: '/expenses/items/',
-    filterLink: '/expenses/items/filter/',
-    detailLink: '/expenses/item/',
+    resourceLink: '/expenses/',
+    filterLink: '/expenses/filter/',
     getInitialState: function() {
         return {
             authorized: false,
@@ -75,7 +73,7 @@ var Expenses = React.createClass({
         this.setState({sum: sum});
     },
     handleLogin: function(e) {
-        $.get(this.listLink, function (data) {
+        $.get(this.resourceLink, function (data) {
             this.setState({items: data, authorized: true, sum: getItemsCostSum(data)});
         }.bind(this));
     },
@@ -91,7 +89,7 @@ var Expenses = React.createClass({
             beforeSend: function(xhr) {
                 xhr.setRequestHeader('X-CSRFToken', readCookie('csrftoken'));
             }.bind(this),
-            url: this.listLink,
+            url: this.resourceLink,
             type: 'POST',
             success: function(result) {
                 var items = this.state.items;
@@ -108,7 +106,10 @@ var Expenses = React.createClass({
                 this.setState({items: items});
                 this.updateSum();
                 $.ajax({
-                    url: this.detailLink + item.id,
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-CSRFToken', readCookie('csrftoken'));
+                    }.bind(this),
+                    url: this.resourceLink + item.id + '/',
                     type: 'DELETE'
                 });
             }
@@ -122,7 +123,10 @@ var Expenses = React.createClass({
                 items[i][key] = value;
                 item = items[i];
                 $.ajax({
-                    url: this.detailLink + id,
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-CSRFToken', readCookie('csrftoken'));
+                    }.bind(this),
+                    url: this.resourceLink + id + '/',
                     type: 'PATCH',
                     data: item,
                     success: function(result) {
