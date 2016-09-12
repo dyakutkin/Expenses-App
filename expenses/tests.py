@@ -20,18 +20,18 @@ class ItemsAPITestCase(APITestCase):
         self.user = User.objects.create(username='testing_admin', password='123123')
         self.client.force_login(self.user)
 
-    def test_items_create(self):
+    def test_expense_create(self):
         response = self.client.post(self.list_link)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_item_update(self):
+    def test_expense_update(self):
         item_data = self.client.post(self.list_link).json()
         item_data['text'] = 'testing_item'
         response = self.client.patch(
             self.detail_link.format(item_data['id']), item_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), item_data)
 
-    def test_item_delete(self):
+    def test_expense_delete(self):
         item_data = self.client.post(self.list_link).json()
         response = self.client.delete(
             self.detail_link.format(item_data['id']))
@@ -69,30 +69,30 @@ class UsersAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
 
-class E2ETestCase(APITestCase):
-    app_link = 'localhost:8000/expenses/'
-    username = 't1'
-    password = '123'
-
-    def setUp(self):
-        user = User.objects.create_user(username=self.username, password=self.password)
-        user.is_active = True
-        item = Expense.objects.create(text='bread', cost=10, user=user)
-        user.save()
-        self.user = user
-        self.driver = webdriver.Chrome()
-
-    def test_login(self):
-        self.driver.get(self.app_link)
-
-        username_input = self.driver.find_element_by_name('username')
-        username_input.send_keys(self.username)
-        password_input = self.driver.find_element_by_name("password")
-        password_input.send_keys(self.password)
-        login_button = self.driver.find_element_by_name("loginButton")
-        time.sleep(3)
-        login_button.click()
-        time.sleep(3)
-
-    def tearDown(self):
-        self.driver.close()
+# class E2ETestCase(APITestCase):
+#     app_link = 'localhost:8000/expenses/'
+#     username = 't1'
+#     password = '123'
+#
+#     def setUp(self):
+#         user = User.objects.create_user(username=self.username, password=self.password)
+#         user.is_active = True
+#         item = Expense.objects.create(text='bread', cost=10, user=user)
+#         user.save()
+#         self.user = user
+#         self.driver = webdriver.Chrome()
+#
+#     def test_login(self):
+#         self.driver.get(self.app_link)
+#
+#         username_input = self.driver.find_element_by_name('username')
+#         username_input.send_keys(self.username)
+#         password_input = self.driver.find_element_by_name("password")
+#         password_input.send_keys(self.password)
+#         login_button = self.driver.find_element_by_name("loginButton")
+#         time.sleep(3)
+#         login_button.click()
+#         time.sleep(3)
+#
+#     def tearDown(self):
+#         self.driver.close()
