@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import HttpResponse
 from django.db.models import Q
 
+from rest_framework import status
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
@@ -51,33 +52,34 @@ class ListCreateItemView(PermittedItemsQuerysetMixin, ModelViewSet):
         serializer = self.serializer_class(data=data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-            return Response(data=serializer.data)
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         return HttpResponse(status=400)
 
 
-class FilteredItemsView(PermittedItemsQuerysetMixin, APIView):
+class FilteringViewMixin(object):
     def get(self, request):
-        filter_serializer = ItemFilterSerializer(data=request.GET)
+        filter_serializer = self.filter_serializer_class(data=request.GET)
         filter_serializer.is_valid(raise_exception=True)
 
         filters = Q()
 
-        date_from = filter_serializer.validated_data.get('date_from')
-        if date_from:
-            filters &= Q(date__gte=date_from)
+        for k, v in self.filter_args_mapping.items():
+            arg = filter_serializer.validated_data.get(k)
+            if arg:
+                filters &= Q(**{v: arg})
 
-        date_to = filter_serializer.validated_data.get('date_to')
-        if date_to:
-            filters &= Q(date__lte=date_to)
+        queryset = self.model_class.objects.filter(filters)
+        data_serializer = self.data_serializer_class(queryset, many=True)
+        return Response(data=data_serializer.data)
 
-        time_from = filter_serializer.validated_data.get('time_from')
-        if time_from:
-            filters &= Q(time__gte=time_from)
 
-        time_to = filter_serializer.validated_data.get('time_to')
-        if time_to:
-            filters &= Q(time__lte=time_to)
-
-        queryset = Item.objects.filter(filters)
-        items_serializer = ItemSerializer(queryset, many=True)
-        return Response(data=items_serializer.data)
+class FilteredItemsView(PermittedItemsQuerysetMixin, FilteringViewMixin, APIView):
+    filter_args_mapping = {
+        'date_from': 'date__gte',
+        'date_to': 'date__lte',
+        'time_from': 'time__gte',
+        'time_to': 'time__lte',
+    }
+    filter_serializer_class = ItemFilterSerializer
+    data_serializer_class = ItemSerializer
+    model_class = Item
