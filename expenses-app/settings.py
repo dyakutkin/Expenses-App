@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'core',
+    'expenses',
 ]
 
 MIDDLEWARE = [
@@ -51,13 +51,13 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'expenses.urls'
+ROOT_URLCONF = 'expenses-app.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            'core/static/',
+            'expenses/static/',
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -71,7 +71,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'expenses.wsgi.application'
+WSGI_APPLICATION = 'expenses-app.wsgi.application'
 
 
 # Database

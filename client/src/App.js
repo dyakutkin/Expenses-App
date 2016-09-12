@@ -18,7 +18,7 @@ var App = React.createClass( {
 var LoginView = React.createClass({
     getInitialState: function() {
         return {
-            url: '/core/login/',
+            url: '/expenses/login/',
             authorized: false
         };
     },
@@ -28,6 +28,7 @@ var LoginView = React.createClass({
         this.setState(targetState);
     },
     handleSubmit: function() {
+        console.log('worker');
         $.ajax({
             crossDomain: true,
             xhrFields: {
@@ -48,18 +49,20 @@ var LoginView = React.createClass({
     render: function() {
         return (
             <div className={this.state.authorized? 'hidden' : ''}>
+                <form>
                 <input type="text" name="username" value={this.state.username} onChange={this.handleUpdate}/>
                 <input type="password" name="password" value={this.state.password} onChange={this.handleUpdate}/>
                 <input type="button" name="loginButton" value="Login" onClick={this.handleSubmit}/>
+                </form>
             </div>
         );
     }
 });
 
 var Expenses = React.createClass({
-    listLink: '/core/items/',
-    filterLink: '/core/items/filter/',
-    detailLink: '/core/item/',
+    listLink: '/expenses/items/',
+    filterLink: '/expenses/items/filter/',
+    detailLink: '/expenses/item/',
     getInitialState: function() {
         return {
             authorized: false,

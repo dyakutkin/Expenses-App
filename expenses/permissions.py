@@ -1,14 +1,14 @@
 from django.db.models import Q
 from rest_framework import permissions
 
-from core.models import Item
+from expenses.models import Expense
 
 
-class PermittedItemsQuerysetMixin(object):
+class PermittedExpensesQuerysetMixin(object):
     def get_queryset(self):
-        queryset = Item.objects.filter(user=self.request.user)
+        queryset = Expense.objects.filter(user=self.request.user)
         if self.request.user.groups.filter(name='admin').exists():
-            queryset = Item.objects.all()
+            queryset = Expense.objects.all()
         elif self.request.user.groups.filter(name='user_manager').exists():
             queryset = None
         return queryset

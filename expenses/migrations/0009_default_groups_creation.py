@@ -13,7 +13,7 @@ def create_default_groups(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0008_auto_20160904_1905'),
+        ('expenses', '0008_auto_20160904_1905'),
     ]
 
     operations = [

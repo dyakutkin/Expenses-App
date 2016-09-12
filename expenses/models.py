@@ -10,9 +10,9 @@ from django.contrib.auth.models import User
 def current_time(): timezone.now().time()
 
 
-class Item(models.Model):
+class Expense(models.Model):
     text = models.CharField(null=True, blank=True, max_length=50)
     date = models.DateField(default=date.today)
     time = models.TimeField(null=True, blank=True, default=current_time)
-    cost = models.FloatField(null=True, blank=True, default=0)
+    cost = models.FloatField(default=0)
     user = models.ForeignKey(User)
