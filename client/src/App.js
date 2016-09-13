@@ -3,7 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 import $ from 'jquery';
 import { Router, Route, hashHistory } from 'react-router';
-import {readCookie, getCSRF, isToday, getItemsCostSum} from './utils.js';
+import {readCookie, createCookie, getCSRF, isToday, getItemsCostSum} from './utils.js';
 
 var App = React.createClass( {
     render: function() {
@@ -26,6 +26,15 @@ var LoginView = React.createClass({
         var targetState = {};
         targetState[e.target.name] = e.target.value;
         this.setState(targetState);
+    },
+    componentDidMount: function() {
+        $.ajax({
+            url: '/csrf/',
+            type: 'GET',
+            success: function(result) {
+                createCookie('csrftoken', result.csrf);
+            }.bind(this)
+        });
     },
     handleSubmit: function() {
         $.ajax({
