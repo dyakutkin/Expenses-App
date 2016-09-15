@@ -4,6 +4,7 @@ from django.shortcuts import HttpResponse
 from django.http import JsonResponse
 from django.db.models import Q
 from django.middleware.csrf import get_token
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -32,14 +33,17 @@ class FilteringViewMixin(object):
         return Response(data=data_serializer.data)
 
 
+@ensure_csrf_cookie
 def login_view(request):
-    user = authenticate(
-        username=request.POST.get('username'),
-        password=request.POST.get('password'))
-    if user:
-        login(request, user)
-        return HttpResponse(status=200)
-    return HttpResponse(status=400)
+    if not request.user.is_authenticated:
+        user = authenticate(
+            username=request.POST.get('username'),
+            password=request.POST.get('password'))
+        if user:
+            login(request, user)
+            return HttpResponse(status=200)
+        return HttpResponse(status=401)
+    return HttpResponse(status=200)
 
 
 def csrf_token_view(request):

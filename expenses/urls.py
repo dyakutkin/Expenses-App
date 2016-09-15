@@ -10,8 +10,8 @@ router.register(r'expenses', ExpensesView, base_name='expenses')
 router.register(r'users', UsersView, base_name='users')
 
 urlpatterns = [
-    url(r'^expenses/filter/$', FilteredExpensesView.as_view()),
-
     url(r'^csrf/$', csrf_token_view),
     url(r'^login/$', login_view, name='login_view'),
+
+    url(r'^expenses/filter/$', FilteredExpensesView.as_view()),
 ] + router.urls

@@ -2,15 +2,12 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import $ from 'jquery';
-import { Router, Route, hashHistory } from 'react-router';
 import {readCookie, createCookie, getCSRF, isToday, getItemsCostSum} from './utils.js';
 
 var App = React.createClass( {
     render: function() {
         return (
-            <Router history={hashHistory}>
-                <Route path="/" component={Expenses}/>
-            </Router>
+            <Expenses/>
         );
     }
 })
@@ -27,12 +24,16 @@ var LoginView = React.createClass({
         targetState[e.target.name] = e.target.value;
         this.setState(targetState);
     },
+    authorize: function() {
+        this.setState({authorized: true});
+        this.props.handleLogin();
+    },
     componentDidMount: function() {
         $.ajax({
-            url: '/csrf/',
+            url: '/login/',
             type: 'GET',
             success: function(result) {
-                createCookie('csrftoken', result.csrf);
+                this.authorize();
             }.bind(this)
         });
     },
@@ -49,9 +50,8 @@ var LoginView = React.createClass({
             type: 'POST',
             data: this.state,
             success: function(result) {
-                this.setState({authorized: true});
-                this.props.handleLogin();
-            }.bind(this)
+                this.authorize();
+            }.bind(this),
         });
     },
     render: function() {
