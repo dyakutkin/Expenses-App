@@ -24,14 +24,6 @@ var createCookie = function(name, value, days) {
     document.cookie = name + "=" + value + expires + "; path=/";
 }
 
-function getCSRF() {
-    var csrftoken = readCookie('csrftoken')
-    if (csrftoken == null) {
-        csrftoken = $('#csrf_token').val()
-    }
-    return csrftoken;
-}
-
 function isToday(date) {
     var currentDate = new Date();
     if (date.getFullYear() !== currentDate.getFullYear()) {
@@ -58,4 +50,4 @@ function getItemsCostSum(items) {
     return sum;
 }
 
-export {readCookie, createCookie, getCSRF, isToday, getItemsCostSum};
+export {readCookie, createCookie, isToday, getItemsCostSum};

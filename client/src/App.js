@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import $ from 'jquery';
-import {readCookie, createCookie, getCSRF, isToday, getItemsCostSum} from './utils.js';
+import {readCookie, createCookie, isToday, getItemsCostSum} from './utils.js';
 
 var App = React.createClass( {
     render: function() {

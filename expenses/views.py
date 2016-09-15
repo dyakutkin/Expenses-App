@@ -1,10 +1,8 @@
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.shortcuts import HttpResponse
-from django.http import JsonResponse
 from django.db.models import Q
-from django.middleware.csrf import get_token
-from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -44,10 +42,6 @@ def login_view(request):
             return HttpResponse(status=200)
         return HttpResponse(status=401)
     return HttpResponse(status=200)
-
-
-def csrf_token_view(request):
-    return JsonResponse({'csrf': get_token(request)})
 
 
 class UsersView(ModelViewSet):
