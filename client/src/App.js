@@ -202,7 +202,7 @@ var List = React.createClass({
 
                     <div className={this.state.filter? '': 'hidden'}>
                         <input type="date" name="date_from" onChange={this.handleFilterChange}/>
-                        <input type="date" name="date_from" onChange={this.handleFilterChange}/>
+                        <input type="date" name="date_to" onChange={this.handleFilterChange}/>
                         <input type="time" name="time_from" onChange={this.handleFilterChange}/>
                         <input type="time" name="time_to" onChange={this.handleFilterChange}/>
                     </div>
