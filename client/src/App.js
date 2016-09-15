@@ -69,7 +69,6 @@ var LoginView = React.createClass({
 
 var Expenses = React.createClass({
     resourceLink: '/expenses/',
-    filterLink: '/expenses/filter/',
     getInitialState: function() {
         return {
             authorized: false,
@@ -87,7 +86,7 @@ var Expenses = React.createClass({
         }.bind(this));
     },
     filterItems: function(filterState) {
-        $.get(this.filterLink, filterState,
+        $.get(this.resourceLink, filterState,
             function (data) {
                 this.setState({items: data, sum: getItemsCostSum(data)});
             }.bind(this)

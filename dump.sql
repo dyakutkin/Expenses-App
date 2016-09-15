@@ -548,7 +548,9 @@ SELECT pg_catalog.setval('auth_permission_id_seq', 21, true);
 --
 
 COPY auth_user (id, password, last_login, is_superuser, username, first_name, last_name, email, is_staff, is_active, date_joined) FROM stdin;
-1	pbkdf2_sha256$30000$4uM0WgnVMmvu$GPODNMAzjFAM0L8c7BuxJfJQJUv56baY21/+gFpf8js=	\N	t	root			dmdmdm@dm.dm	t	t	2016-09-14 14:58:02.515409+00
+2	pbkdf2_sha256$30000$rwDESTD9vqpt$YvNfJi5MlxWZyyppwu6ARv7m1SIYxQJUpw+HPnJ/vL0=	\N	f	user				f	t	2016-09-15 13:33:36.682992+00
+3	pbkdf2_sha256$30000$MjWWOBeHxD9P$0aegMc9unLeLVIeZgqKI5U5xwJ/UtGg/pd27/VhFCfk=	\N	f	user_manager				f	t	2016-09-15 13:33:51.179075+00
+4	pbkdf2_sha256$30000$487j1pdE2hJ6$SazRLZrV6CJ+7vPpN6HOxHBavy/x07N7Zj/8uxSWyps=	2016-09-15 13:54:56.812774+00	t	admin			admin@admin.admin	t	t	2016-09-15 13:36:01.904548+00
 \.
 
 
@@ -557,6 +559,8 @@ COPY auth_user (id, password, last_login, is_superuser, username, first_name, la
 --
 
 COPY auth_user_groups (id, user_id, group_id) FROM stdin;
+1	3	1
+2	4	2
 \.
 
 
@@ -564,14 +568,14 @@ COPY auth_user_groups (id, user_id, group_id) FROM stdin;
 -- Name: auth_user_groups_id_seq; Type: SEQUENCE SET; Schema: public; Owner: expenses
 --
 
-SELECT pg_catalog.setval('auth_user_groups_id_seq', 1, false);
+SELECT pg_catalog.setval('auth_user_groups_id_seq', 2, true);
 
 
 --
 -- Name: auth_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: expenses
 --
 
-SELECT pg_catalog.setval('auth_user_id_seq', 1, true);
+SELECT pg_catalog.setval('auth_user_id_seq', 4, true);
 
 
 --
@@ -669,6 +673,8 @@ SELECT pg_catalog.setval('django_migrations_id_seq', 23, true);
 --
 
 COPY django_session (session_key, session_data, expire_date) FROM stdin;
+s7bboa2mf5zqv8xhtrnuq33efshe106j	MTdmZWM5NmNkZTBkMWU4NmYyNDFkMjcyMzlkMjVhMjIzYjM0OWZlYzp7Il9hdXRoX3VzZXJfaGFzaCI6ImNkMzM4YjAyMjUzMzNiMjA1N2RiYzI4Njk0NmZhNjQ5MTc3ODNkMWIiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOiIxIn0=	2016-09-29 13:13:56.085187+00
+yie5a8tk87h0y9i4k0oz8uoj5to3k7ha	YzdmMmZjZmU0MTlkY2VkNWJiOWJhMDNkMTQxNGI4MGU5MjZiYTJhZDp7Il9hdXRoX3VzZXJfaGFzaCI6IjdmNjliYmZhMzkxYTMxZTAxZDNjMmEyMWI3NDczZjkyMjcxYTJkYzMiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOiI0In0=	2016-09-29 13:54:56.816406+00
 \.
 
 
@@ -677,6 +683,9 @@ COPY django_session (session_key, session_data, expire_date) FROM stdin;
 --
 
 COPY expenses_expense (id, text, date, "time", cost, user_id) FROM stdin;
+3	bread	2016-09-15	\N	10	2
+4	butter	2016-09-15	\N	15	2
+5	sausage	2016-09-15	\N	30	4
 \.
 
 
@@ -684,7 +693,7 @@ COPY expenses_expense (id, text, date, "time", cost, user_id) FROM stdin;
 -- Name: expenses_expense_id_seq; Type: SEQUENCE SET; Schema: public; Owner: expenses
 --
 
-SELECT pg_catalog.setval('expenses_expense_id_seq', 1, false);
+SELECT pg_catalog.setval('expenses_expense_id_seq', 5, true);
 
 
 --

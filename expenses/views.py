@@ -1,34 +1,16 @@
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.shortcuts import HttpResponse
-from django.db.models import Q
 from django.views.decorators.csrf import ensure_csrf_cookie
 
-from rest_framework import status
+from rest_framework import status, filters
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.views import APIView
 
-from expenses.permissions import PermittedExpensesQuerysetMixin, UserManagementPermission
-
+from expenses.permissions import UserManagementPermission
 from expenses.models import Expense
-from expenses.serializers import (ExpenseSerializer, ExpenseFilterSerializer, UserSerializer)
-
-
-class FilteringViewMixin(object):
-    def get(self, request):
-        filter_serializer = self.filter_serializer_class(data=request.GET)
-        filter_serializer.is_valid(raise_exception=True)
-        filters = Q()
-
-        for k, v in self.filter_args_mapping.items():
-            arg = filter_serializer.validated_data.get(k)
-            if arg:
-                filters &= Q(**{v: arg})
-
-        queryset = self.model_class.objects.filter(filters)
-        data_serializer = self.data_serializer_class(queryset, many=True)
-        return Response(data=data_serializer.data)
+from expenses.serializers import (ExpenseSerializer, UserSerializer)
+from expenses.filters import ExpenseFilter
 
 
 @ensure_csrf_cookie
@@ -50,8 +32,18 @@ class UsersView(ModelViewSet):
     permission_classes = [UserManagementPermission]
 
 
-class ExpensesView(PermittedExpensesQuerysetMixin, ModelViewSet):
+class ExpensesView(ModelViewSet):
     serializer_class = ExpenseSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filter_class = ExpenseFilter
+
+    def get_queryset(self):
+        queryset = Expense.objects.filter(user=self.request.user)
+        if self.request.user.groups.filter(name='admin').exists():
+            queryset = Expense.objects.all()
+        elif self.request.user.groups.filter(name='user_manager').exists():
+            queryset = None
+        return queryset
 
     def create(self, serializer):
         data = self.request.data.copy()
@@ -61,15 +53,3 @@ class ExpensesView(PermittedExpensesQuerysetMixin, ModelViewSet):
             serializer.save()
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         return HttpResponse(status=400)
-
-
-class FilteredExpensesView(PermittedExpensesQuerysetMixin, FilteringViewMixin, APIView):
-    filter_args_mapping = {
-        'date_from': 'date__gte',
-        'date_to': 'date__lte',
-        'time_from': 'time__gte',
-        'time_to': 'time__lte',
-    }
-    filter_serializer_class = ExpenseFilterSerializer
-    data_serializer_class = ExpenseSerializer
-    model_class = Expense

@@ -9,13 +9,6 @@ class ExpenseSerializer(serializers.ModelSerializer):
         model = Expense
 
 
-class ExpenseFilterSerializer(serializers.Serializer):
-    date_from = serializers.DateField(required=False)
-    date_to = serializers.DateField(required=False)
-    time_from = serializers.TimeField(required=False)
-    time_to = serializers.TimeField(required=False)
-
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

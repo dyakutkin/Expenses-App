@@ -2,7 +2,7 @@ from django.conf.urls import url
 from rest_framework.routers import SimpleRouter
 
 from expenses.views import (
-    ExpensesView, FilteredExpensesView, UsersView, login_view)
+    ExpensesView, UsersView, login_view)
 
 router = SimpleRouter()
 router.register(r'expenses', ExpensesView, base_name='expenses')
@@ -10,5 +10,4 @@ router.register(r'users', UsersView, base_name='users')
 
 urlpatterns = [
     url(r'^login/$', login_view, name='login_view'),
-    url(r'^expenses/filter/$', FilteredExpensesView.as_view()),
 ] + router.urls

@@ -1,18 +1,6 @@
 from django.db.models import Q
 from rest_framework import permissions
 
-from expenses.models import Expense
-
-
-class PermittedExpensesQuerysetMixin(object):
-    def get_queryset(self):
-        queryset = Expense.objects.filter(user=self.request.user)
-        if self.request.user.groups.filter(name='admin').exists():
-            queryset = Expense.objects.all()
-        elif self.request.user.groups.filter(name='user_manager').exists():
-            queryset = None
-        return queryset
-
 
 class GroupPermissionMixin(object):
     def has_permission(self, request, view):
