@@ -192,7 +192,7 @@ var List = React.createClass({
         }.bind(this));
         return (
             <div>
-                <button onClick={this.props.addItem}>Add Item</button>
+                <button type="button" onClick={this.props.addItem}>Add Item</button>
                 <p></p>
                 <div className={this.props.sum > this.state.limit? 'limit_red': 'limit_green'}>
                     Day limit: <span>{this.state.limit}</span>

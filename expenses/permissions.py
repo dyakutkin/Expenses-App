@@ -15,3 +15,6 @@ class GroupPermissionMixin(object):
 class UserManagementPermission(GroupPermissionMixin, permissions.BasePermission):
     permitted_groups = ['admin', 'user_manager']
 
+
+class ExpensesPermission(GroupPermissionMixin, permissions.BasePermission):
+    permitted_groups = ['admin', 'user']

@@ -7,7 +7,7 @@ from rest_framework import status, filters
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from expenses.permissions import UserManagementPermission
+from expenses.permissions import UserManagementPermission, ExpensesPermission
 from expenses.models import Expense
 from expenses.serializers import (ExpenseSerializer, UserSerializer)
 from expenses.filters import ExpenseFilter
@@ -36,13 +36,13 @@ class ExpensesView(ModelViewSet):
     serializer_class = ExpenseSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filter_class = ExpenseFilter
+    permission_classes = [ExpensesPermission]
 
     def get_queryset(self):
-        queryset = Expense.objects.filter(user=self.request.user)
         if self.request.user.groups.filter(name='admin').exists():
             queryset = Expense.objects.all()
-        elif self.request.user.groups.filter(name='user_manager').exists():
-            queryset = None
+        else:
+            queryset = Expense.objects.filter(user=self.request.user)
         return queryset
 
     def create(self, serializer):
