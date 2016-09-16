@@ -1,7 +1,10 @@
 from django.contrib.auth.models import User, Group
 
-from rest_framework.test import APIClient, APITestCase
+from rest_framework.test import APITestCase
 from rest_framework import status
+
+from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from expenses.models import Expense
 

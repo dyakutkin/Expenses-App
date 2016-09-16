@@ -5,6 +5,11 @@ db:
     - POSTGRES_PASSWORD=onetwothree
   volumes:
     - ./:/web
+client:
+  image: node:4.5.0
+  volumes:
+    - ./:/web
+  command: /bin/bash -c "cd /web/client/ && npm install && npm run build"
 app:
   image: adolgarev/python2:1473852567
   volumes:
@@ -18,8 +23,3 @@ app:
   environment:
     - DJANGO_SETTINGS_MODULE=expenses-app.settings
   command: /bin/bash -c "cd /web && pip install -r requirements.txt && exec invoke run_dev"
-client:
-  image: node:4.5.0
-  volumes:
-    - ./:/web
-  command: /bin/bash -c "cd /web/client/ && npm install && npm run build"
