@@ -40,12 +40,8 @@ function isToday(date) {
 
 function getItemsCostSum(items) {
     var sum = 0;
-    var currentDate = new Date();
     for (var i = 0; i < items.length; i++) {
-        var date = new Date(items[i].date);
-        if (isToday(date)) {
-            sum += parseInt(items[i].cost);
-        }
+        sum += parseInt(items[i].cost);
     }
     return sum;
 }
