@@ -24,16 +24,16 @@ var LoginView = React.createClass({
         targetState[e.target.name] = e.target.value;
         this.setState(targetState);
     },
-    authorize: function() {
+    authorize: function(userId) {
         this.setState({authorized: true});
-        this.props.handleLogin();
+        this.props.handleLogin(userId);
     },
     componentDidMount: function() {
         $.ajax({
             url: '/login/',
             type: 'GET',
             success: function(result) {
-                this.authorize();
+                this.authorize(result.id);
             }.bind(this)
         });
     },
@@ -50,7 +50,7 @@ var LoginView = React.createClass({
             type: 'POST',
             data: this.state,
             success: function(result) {
-                this.authorize();
+                this.authorize(result.id);
             }.bind(this),
         });
     },
@@ -80,9 +80,9 @@ var Expenses = React.createClass({
         var sum = getItemsCostSum(this.state.items);
         this.setState({sum: sum});
     },
-    handleLogin: function(e) {
+    handleLogin: function(userId) {
         $.get(this.resourceLink, function (data) {
-            this.setState({items: data, authorized: true, sum: getItemsCostSum(data)});
+            this.setState({items: data, authorized: true, sum: getItemsCostSum(data), userId: userId});
         }.bind(this));
     },
     filterItems: function(filterState) {
@@ -98,6 +98,7 @@ var Expenses = React.createClass({
                 xhr.setRequestHeader('X-CSRFToken', readCookie('csrftoken'));
             }.bind(this),
             url: this.resourceLink,
+            data: {user: this.state.userId},
             type: 'POST',
             success: function(result) {
                 var items = this.state.items;

@@ -15,6 +15,11 @@ class GroupPermissionMixin(object):
 class UserManagementPermission(GroupPermissionMixin, permissions.BasePermission):
     permitted_groups = ['admin', 'user_manager']
 
+    def has_object_permission(self, request, view, obj):
+        if obj.groups.filter(name='user').exists():
+            return True
+        return False
+
 
 class ExpensesPermission(GroupPermissionMixin, permissions.BasePermission):
     permitted_groups = ['admin', 'user']

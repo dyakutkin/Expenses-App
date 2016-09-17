@@ -482,6 +482,7 @@ ALTER TABLE ONLY expenses_expense ALTER COLUMN id SET DEFAULT nextval('expenses_
 COPY auth_group (id, name) FROM stdin;
 1	user_manager
 2	admin
+3	user
 \.
 
 
@@ -489,7 +490,7 @@ COPY auth_group (id, name) FROM stdin;
 -- Name: auth_group_id_seq; Type: SEQUENCE SET; Schema: public; Owner: expenses
 --
 
-SELECT pg_catalog.setval('auth_group_id_seq', 2, true);
+SELECT pg_catalog.setval('auth_group_id_seq', 3, true);
 
 
 --
@@ -548,9 +549,9 @@ SELECT pg_catalog.setval('auth_permission_id_seq', 21, true);
 --
 
 COPY auth_user (id, password, last_login, is_superuser, username, first_name, last_name, email, is_staff, is_active, date_joined) FROM stdin;
-2	pbkdf2_sha256$30000$rwDESTD9vqpt$YvNfJi5MlxWZyyppwu6ARv7m1SIYxQJUpw+HPnJ/vL0=	\N	f	user				f	t	2016-09-15 13:33:36.682992+00
-3	pbkdf2_sha256$30000$MjWWOBeHxD9P$0aegMc9unLeLVIeZgqKI5U5xwJ/UtGg/pd27/VhFCfk=	\N	f	user_manager				f	t	2016-09-15 13:33:51.179075+00
-4	pbkdf2_sha256$30000$487j1pdE2hJ6$SazRLZrV6CJ+7vPpN6HOxHBavy/x07N7Zj/8uxSWyps=	2016-09-15 13:54:56.812774+00	t	admin			admin@admin.admin	t	t	2016-09-15 13:36:01.904548+00
+1	pbkdf2_sha256$30000$SSSChjevlscp$+qd9S+8iygb1yZMYcLHXIN/X6xvwU7wKKH/toBYcAF4=	\N	f	user				f	t	2016-09-17 18:58:32.459613+00
+2	pbkdf2_sha256$30000$giEhR0LwbWR2$yv8vTKStZqylc7xS6ZOdnVoQ9yhw9gbW4GIsjiiFxdI=	\N	f	user_manager				f	t	2016-09-17 18:58:32.637379+00
+3	pbkdf2_sha256$30000$GZdnrtWrgNhV$vm/9Ad1UhA3khbQjMKhAL5cu57wh/wEOFuOZ8XZ9yMU=	2016-09-17 19:01:30.471858+00	t	admin				t	t	2016-09-17 18:58:32.818356+00
 \.
 
 
@@ -559,8 +560,9 @@ COPY auth_user (id, password, last_login, is_superuser, username, first_name, la
 --
 
 COPY auth_user_groups (id, user_id, group_id) FROM stdin;
-1	3	1
-2	4	2
+1	1	3
+2	2	1
+3	3	2
 \.
 
 
@@ -568,14 +570,14 @@ COPY auth_user_groups (id, user_id, group_id) FROM stdin;
 -- Name: auth_user_groups_id_seq; Type: SEQUENCE SET; Schema: public; Owner: expenses
 --
 
-SELECT pg_catalog.setval('auth_user_groups_id_seq', 2, true);
+SELECT pg_catalog.setval('auth_user_groups_id_seq', 3, true);
 
 
 --
 -- Name: auth_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: expenses
 --
 
-SELECT pg_catalog.setval('auth_user_id_seq', 4, true);
+SELECT pg_catalog.setval('auth_user_id_seq', 3, true);
 
 
 --
@@ -635,29 +637,30 @@ SELECT pg_catalog.setval('django_content_type_id_seq', 7, true);
 --
 
 COPY django_migrations (id, app, name, applied) FROM stdin;
-1	contenttypes	0001_initial	2016-09-14 14:53:16.322388+00
-2	auth	0001_initial	2016-09-14 14:53:16.490401+00
-3	admin	0001_initial	2016-09-14 14:53:16.551713+00
-4	admin	0002_logentry_remove_auto_add	2016-09-14 14:53:16.578757+00
-5	contenttypes	0002_remove_content_type_name	2016-09-14 14:53:16.633418+00
-6	auth	0002_alter_permission_name_max_length	2016-09-14 14:53:16.658207+00
-7	auth	0003_alter_user_email_max_length	2016-09-14 14:53:16.688762+00
-8	auth	0004_alter_user_username_opts	2016-09-14 14:53:16.710215+00
-9	auth	0005_alter_user_last_login_null	2016-09-14 14:53:16.73779+00
-10	auth	0006_require_contenttypes_0002	2016-09-14 14:53:16.744275+00
-11	auth	0007_alter_validators_add_error_messages	2016-09-14 14:53:16.762891+00
-12	auth	0008_alter_user_username_max_length	2016-09-14 14:53:16.798631+00
-13	expenses	0001_initial	2016-09-14 14:53:16.866969+00
-14	expenses	0002_auto_20160902_1444	2016-09-14 14:53:16.907009+00
-15	expenses	0003_auto_20160904_1739	2016-09-14 14:53:16.947337+00
-16	expenses	0004_auto_20160904_1742	2016-09-14 14:53:16.97417+00
-17	expenses	0005_auto_20160904_1743	2016-09-14 14:53:17.001841+00
-18	expenses	0006_auto_20160904_1822	2016-09-14 14:53:17.047504+00
-19	expenses	0007_auto_20160904_1903	2016-09-14 14:53:17.074551+00
-20	expenses	0008_auto_20160904_1905	2016-09-14 14:53:17.099144+00
-21	expenses	0009_default_groups_creation	2016-09-14 14:53:17.115021+00
-22	expenses	0010_auto_20160912_1341	2016-09-14 14:53:17.205701+00
-23	sessions	0001_initial	2016-09-14 14:53:17.240263+00
+1	contenttypes	0001_initial	2016-09-17 18:58:27.172897+00
+2	auth	0001_initial	2016-09-17 18:58:29.216314+00
+3	admin	0001_initial	2016-09-17 18:58:29.642623+00
+4	admin	0002_logentry_remove_auto_add	2016-09-17 18:58:29.751103+00
+5	contenttypes	0002_remove_content_type_name	2016-09-17 18:58:29.925423+00
+6	auth	0002_alter_permission_name_max_length	2016-09-17 18:58:30.0378+00
+7	auth	0003_alter_user_email_max_length	2016-09-17 18:58:30.149542+00
+8	auth	0004_alter_user_username_opts	2016-09-17 18:58:30.213305+00
+9	auth	0005_alter_user_last_login_null	2016-09-17 18:58:30.312096+00
+10	auth	0006_require_contenttypes_0002	2016-09-17 18:58:30.355353+00
+11	auth	0007_alter_validators_add_error_messages	2016-09-17 18:58:30.418953+00
+12	auth	0008_alter_user_username_max_length	2016-09-17 18:58:30.658577+00
+13	expenses	0001_initial	2016-09-17 18:58:30.933691+00
+14	expenses	0002_auto_20160902_1444	2016-09-17 18:58:31.155809+00
+15	expenses	0003_auto_20160904_1739	2016-09-17 18:58:31.294037+00
+16	expenses	0004_auto_20160904_1742	2016-09-17 18:58:31.377781+00
+17	expenses	0005_auto_20160904_1743	2016-09-17 18:58:31.497058+00
+18	expenses	0006_auto_20160904_1822	2016-09-17 18:58:31.695286+00
+19	expenses	0007_auto_20160904_1903	2016-09-17 18:58:31.793101+00
+20	expenses	0008_auto_20160904_1905	2016-09-17 18:58:31.917173+00
+21	expenses	0009_default_groups_creation	2016-09-17 18:58:32.052114+00
+22	expenses	0010_auto_20160912_1341	2016-09-17 18:58:32.41624+00
+23	expenses	0011_regular_user_role	2016-09-17 18:58:33.046704+00
+24	sessions	0001_initial	2016-09-17 18:58:33.56875+00
 \.
 
 
@@ -665,7 +668,7 @@ COPY django_migrations (id, app, name, applied) FROM stdin;
 -- Name: django_migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: expenses
 --
 
-SELECT pg_catalog.setval('django_migrations_id_seq', 23, true);
+SELECT pg_catalog.setval('django_migrations_id_seq', 24, true);
 
 
 --
@@ -673,8 +676,7 @@ SELECT pg_catalog.setval('django_migrations_id_seq', 23, true);
 --
 
 COPY django_session (session_key, session_data, expire_date) FROM stdin;
-s7bboa2mf5zqv8xhtrnuq33efshe106j	MTdmZWM5NmNkZTBkMWU4NmYyNDFkMjcyMzlkMjVhMjIzYjM0OWZlYzp7Il9hdXRoX3VzZXJfaGFzaCI6ImNkMzM4YjAyMjUzMzNiMjA1N2RiYzI4Njk0NmZhNjQ5MTc3ODNkMWIiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOiIxIn0=	2016-09-29 13:13:56.085187+00
-yie5a8tk87h0y9i4k0oz8uoj5to3k7ha	YzdmMmZjZmU0MTlkY2VkNWJiOWJhMDNkMTQxNGI4MGU5MjZiYTJhZDp7Il9hdXRoX3VzZXJfaGFzaCI6IjdmNjliYmZhMzkxYTMxZTAxZDNjMmEyMWI3NDczZjkyMjcxYTJkYzMiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOiI0In0=	2016-09-29 13:54:56.816406+00
+hzt92i1vn906ecui2d2mfq4agr448obz	NGQwYzEzY2NmNmM1MmY2YWY4MjFhYmQyMDY4ZWYzNjFlNTRlZDgyMjp7Il9hdXRoX3VzZXJfaGFzaCI6IjgxODQ2ZjM2ZmQ1NDlhZWE0N2M0YzYxODAxZWEzODdhYmVlMTgzMDQiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOiIzIn0=	2016-10-01 19:01:30.548576+00
 \.
 
 
@@ -683,9 +685,6 @@ yie5a8tk87h0y9i4k0oz8uoj5to3k7ha	YzdmMmZjZmU0MTlkY2VkNWJiOWJhMDNkMTQxNGI4MGU5MjZ
 --
 
 COPY expenses_expense (id, text, date, "time", cost, user_id) FROM stdin;
-3	bread	2016-09-15	\N	10	2
-4	butter	2016-09-15	\N	15	2
-5	sausage	2016-09-15	\N	30	4
 \.
 
 
@@ -693,7 +692,7 @@ COPY expenses_expense (id, text, date, "time", cost, user_id) FROM stdin;
 -- Name: expenses_expense_id_seq; Type: SEQUENCE SET; Schema: public; Owner: expenses
 --
 
-SELECT pg_catalog.setval('expenses_expense_id_seq', 5, true);
+SELECT pg_catalog.setval('expenses_expense_id_seq', 1, false);
 
 
 --

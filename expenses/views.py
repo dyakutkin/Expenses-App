@@ -1,10 +1,10 @@
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.shortcuts import HttpResponse
+from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 
-from rest_framework import status, filters
-from rest_framework.response import Response
+from rest_framework import filters
 from rest_framework.viewsets import ModelViewSet
 
 from expenses.permissions import UserManagementPermission, ExpensesPermission
@@ -21,9 +21,9 @@ def login_view(request):
             password=request.POST.get('password'))
         if user:
             login(request, user)
-            return HttpResponse(status=200)
+            return JsonResponse(UserSerializer(request.user).data)
         return HttpResponse(status=401)
-    return HttpResponse(status=200)
+    return JsonResponse(UserSerializer(request.user).data)
 
 
 class UsersView(ModelViewSet):
@@ -44,12 +44,3 @@ class ExpensesView(ModelViewSet):
         else:
             queryset = Expense.objects.filter(user=self.request.user)
         return queryset
-
-    def create(self, serializer):
-        data = self.request.data.copy()
-        data['user'] = self.request.user.id
-        serializer = self.serializer_class(data=data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
-        return HttpResponse(status=400)
