@@ -23,3 +23,8 @@ class UserManagementPermission(GroupPermissionMixin, permissions.BasePermission)
 
 class ExpensesPermission(GroupPermissionMixin, permissions.BasePermission):
     permitted_groups = ['admin', 'user']
+
+    def has_object_permission(self, request, view, obj):
+        if request.user.groups.filter(name='user').exists():
+            return obj.user == request.user
+        return True
