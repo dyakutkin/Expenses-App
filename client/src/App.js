@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 import $ from 'jquery';
@@ -150,17 +150,15 @@ var Expenses = React.createClass({
         return (
             <div className="App">
                 <LoginView ref="loginView" handleLogin={this.handleLogin}></LoginView>
-                <p className="App-intro">
-                    <List
+                <List
                         className={this.state.authorized? '': 'hidden'}
-                        removeItem={this.removeItem.bind(this)}
-                        addItem={this.addItem.bind(this)}
-                        updateItem={this.updateItem.bind(this)}
-                        filterItems={this.filterItems.bind(this)}
+                        removeItem={this.removeItem}
+                        addItem={this.addItem}
+                        updateItem={this.updateItem}
+                        filterItems={this.filterItems}
                         items={this.state.items}
                         sum={this.state.sum}
                         visible={this.state.authorized}/>
-                </p>
             </div>
         );
     }
@@ -188,31 +186,49 @@ var List = React.createClass({
     render: function() {
         var listItems = this.props.items.map(function(listItem) {
             return (
-                <ListItem data={listItem} removeItem={this.props.removeItem} updateItem={this.props.updateItem}/>
+                <ListItem key={listItem.id} data={listItem}
+                    removeItem={this.props.removeItem} updateItem={this.props.updateItem}/>
             );
         }.bind(this));
         return (
             <div>
-                <button type="button" onClick={this.props.addItem}>Add Item</button>
-                <p></p>
-                <div className={this.props.sum > this.state.limit? 'limit_red': 'limit_green'}>
-                    Day limit: <span>{this.state.limit}</span>
-                    <input className={this.state.edit? '': 'hidden'} type="number" name="limit" onBlur={this.handleLimitChange}/>
-                    <input type="button" name="edit" value="edit" onClick={()=> this.setState({edit: !this.state.edit})}/>
 
-                    <div className={this.state.filter? '': 'hidden'}>
-                        <input type="date" name="date_from" onChange={this.handleFilterChange}/>
-                        <input type="date" name="date_to" onChange={this.handleFilterChange}/>
-                        <input type="time" name="time_from" onChange={this.handleFilterChange}/>
-                        <input type="time" name="time_to" onChange={this.handleFilterChange}/>
+            <nav className="navbar navbar-inverse">
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <div class="container-fluid">
+                          <a href="#" className="navbar-brand"
+                            name="addItem" onClick={this.props.addItem}>Add</a>
+
+                          <FilteringModal modalId="filterModal" handleFilterChange={this.handleFilterChange}></FilteringModal>
+                          <a href="#" className="navbar-brand"
+                            name="toggleFilter" data-toggle="modal" data-target="#filterModal">Filter</a>
+
+
+                          <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                              <form className="navbar-form navbar-left" role="search">
+                                <div className="form-group">
+                                  <input type="number" name="limit" onBlur={this.handleLimitChange} className="form-control" placeholder="Limit"/>
+                                </div>
+                              </form>
+                          </div>
                     </div>
-                    <input type="button" name="filter" value="filter"
-                            onClick={()=> this.setState({filter: !this.state.filter})}/>
                 </div>
+            </nav>
+                <h2 className={this.props.sum > this.state.limit? 'limit_red': 'limit_green'}> Sum: {this.props.sum} </h2>
                 <p></p>
-                Sum: {this.props.sum}
-                <p></p>
-                {listItems}
+                <div className="bs-component">
+                    <table className="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <td>Date</td>
+                                <td>Time</td>
+                                <td>Text</td>
+                                <td>Cost</td>
+                            </tr>
+                        </thead>
+                        <tbody>{listItems}</tbody>
+                    </table>
+                </div>
             </div>
         );
     }
@@ -222,37 +238,162 @@ var ListItem = React.createClass({
     getInitialState: function() {
         return {edit: false};
     },
-    handleUpdate: function(e) {
-        this.props.updateItem(this.props.data.id, e.target.name, e.target.value);
-    },
     handleDelete: function(e) {
         this.props.removeItem(this.props.data);
     },
     render: function() {
         return (
-            <div>
-                <li>
-                <p>
-                <form>
-                    <span>Date: {this.props.data.date}</span>
-                    <input className={this.state.edit? '': 'hidden'} type="date" name="date" onBlur={this.handleUpdate}/>
-                    <p></p>
-                    <span>Time: {this.props.data.time}</span>
-                    <input className={this.state.edit? '': 'hidden'} type="time" name="time" onBlur={this.handleUpdate}/>
-                    <p></p>
-                    <span>Text: {this.props.data.text}</span>
-                    <input className={this.state.edit? '': 'hidden'} type="text" name="text" onBlur={this.handleUpdate}/>
-                    <p></p>
-                    <span>Cost: {this.props.data.cost}</span>
-                    <input className={this.state.edit? '': 'hidden'} type="number" name="cost" onBlur={this.handleUpdate}/>
-                    <p></p>
-                    <input type="button" name="edit" value="edit" onClick={()=> this.setState({edit: !this.state.edit})}/>
-                    <input type="button" name="delete" value="x" onClick={this.handleDelete}/>
-                </form>
-                </p>
-                </li>
-            </div>
+            <tr>
+                <td>{this.props.data.date}</td>
+                <td>{this.props.data.time}</td>
+                <td>{this.props.data.text}</td>
+                <td>{this.props.data.cost}</td>
+                <td>
+                    <a href="#" className="btn btn-lg btn-success"
+                        name="edit" data-toggle="modal" data-target={'#basicModal' + this.props.data.id}>edit</a>
+                    <ListItemEditingModal
+                        data={this.props.data}
+                        updateItem={this.props.updateItem}/>
+                </td>
+                <td>
+                    <a href="#" name="delete" className="btn btn-danger" onClick={this.handleDelete}>x</a>
+                </td>
+            </tr>
+
         );
+    }
+});
+
+var ListItemEditingModal = React.createClass({
+    getInitialState: function() {
+        return this.props.data;
+    },
+    handleUpdate: function(e) {
+        this.props.updateItem(this.props.data.id, e.target.name, e.target.value);
+    },
+    handleChange: function(e) {
+        var newState = {};
+        newState[e.target.name] = e.target.value;
+        this.setState(newState);
+    },
+    render: function() {
+        return (
+            <div className="modal" id={'basicModal' + this.props.data.id} tabIndex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-body">
+                            <form className="form-horizontal">
+                                <fieldset>
+                                    <div className="form-group">
+                                      <label htmlFor="date" className="col-lg-2 control-label">Date</label>
+                                      <div className="col-lg-4">
+                                         <input
+                                            type="date" className="form-control" id="date" name="date"
+                                            value={this.state.date}
+                                            onBlur={this.handleUpdate}
+                                            onChange={this.handleChange}/>
+                                      </div>
+                                    </div>
+
+                                    <div className="form-group">
+                                      <label htmlFor="time" className="col-lg-2 control-label">Time</label>
+                                      <div className="col-lg-4">
+                                          <input
+                                                type="time" className="form-control" id="time" name="time"
+                                                value={this.state.time}
+                                                onBlur={this.handleUpdate}
+                                                onChange={this.handleChange}/>
+                                      </div>
+                                    </div>
+
+                                    <div className="form-group">
+                                      <label htmlFor="text" className="col-lg-2 control-label">Text</label>
+                                      <div className="col-lg-5">
+                                          <input
+                                                type="text" className="form-control" id="text" name="text"
+                                                value={this.state.text}
+                                                onBlur={this.handleUpdate}
+                                                onChange={this.handleChange}/>
+                                      </div>
+                                    </div>
+
+                                    <div className="form-group">
+                                      <label htmlFor="cost" className="col-lg-2 control-label">Cost</label>
+                                      <div className="col-lg-2">
+                                          <input
+                                                type="number" className="form-control" id="cost" name="cost"
+                                                value={this.state.cost}
+                                                onBlur={this.handleUpdate}
+                                                onChange={this.handleChange}/>
+                                      </div>
+                                    </div>
+                                </fieldset>
+                            </form>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-default" data-dismiss="modal">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+});
+
+var FilteringModal = React.createClass({
+    render: function() {
+        return (
+            <div className="modal" id={this.props.modalId} tabIndex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-body">
+                            <form className="form-horizontal">
+                                <fieldset>
+                                    <div className="form-group">
+                                      <label htmlFor="date_from" className="col-lg-2 control-label">Start Date</label>
+                                      <div className="col-lg-4">
+                                         <input
+                                            type="date" className="form-control" id="date_from" name="date_from"
+                                            onChange={this.props.handleFilterChange}/>
+                                      </div>
+                                    </div>
+
+                                    <div className="form-group">
+                                      <label htmlFor="date_to" className="col-lg-2 control-label">End Date</label>
+                                      <div className="col-lg-4">
+                                         <input
+                                            type="date" className="form-control" id="date_to" name="date_to"
+                                            onChange={this.props.handleFilterChange}/>
+                                      </div>
+                                    </div>
+
+                                    <div className="form-group">
+                                      <label htmlFor="time_from" className="col-lg-2 control-label">Start Time</label>
+                                      <div className="col-lg-4">
+                                         <input
+                                            type="time" className="form-control" id="time_from" name="time_from"
+                                            onChange={this.props.handleFilterChange}/>
+                                      </div>
+                                    </div>
+
+                                    <div className="form-group">
+                                      <label htmlFor="time_to" className="col-lg-2 control-label">End Time</label>
+                                      <div className="col-lg-4">
+                                         <input
+                                            type="time" className="form-control" id="time_to" name="time_to"
+                                            onChange={this.props.handleFilterChange}/>
+                                      </div>
+                                    </div>
+                                </fieldset>
+                            </form>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-default" data-dismiss="modal">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
     }
 });
 
