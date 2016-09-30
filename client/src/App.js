@@ -241,7 +241,7 @@ var List = React.createClass({
                     <h2 className={this.props.sum > this.state.limit? 'limit_red': 'limit_green'}> Sum: {this.props.sum} </h2>
                     <p></p>
                 </div>
-                <div className={this.props.visible? "bs-component": 'hidden'}>
+                <div id="itemsList" className={this.props.visible? "bs-component": 'hidden'}>
                     <table className="table table-striped table-hover">
                         <thead>
                             <tr>

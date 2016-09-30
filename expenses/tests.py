@@ -3,6 +3,12 @@ from django.contrib.auth.models import User, Group
 from rest_framework.test import APITestCase
 from rest_framework import status
 
+import unittest
+
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 from expenses.models import Expense
 from expenses.serializers import ExpenseSerializer
@@ -205,3 +211,34 @@ class UsersAPITestCase(APITestCase):
         response = self.client.delete(
             self.detail_link.format(another_manager_user.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+@unittest.skip("E2E testing environment is not configured yet")
+class E2ETestCase(APITestCase):
+    app_link = 'http://localhost:3000/'
+    username = 'user'
+    password = 'Auph2Aad'
+
+    def setUp(self):
+        self.driver = webdriver.Chrome()
+
+    def tearDown(self):
+        self.driver.close()
+
+    def test_login(self):
+        self.driver.get(self.app_link)
+
+        username_input = self.driver.find_element_by_id("inputUsername")
+        password_input = self.driver.find_element_by_id("inputPassword")
+        login_submit = self.driver.find_element_by_name("loginButton")
+        items_list = self.driver.find_element_by_id("itemsList")
+
+        username_input.send_keys(self.username)
+        password_input.send_keys(self.password)
+
+        login_submit.click()
+        WebDriverWait(self.driver, 2).until(
+            EC.invisibility_of_element_located((By.ID, "itemsList"))
+        )
+
+        self.assertNotEquals(items_list.get_attribute("class"), "hidden")
