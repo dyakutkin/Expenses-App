@@ -56,10 +56,34 @@ var LoginView = React.createClass({
     render: function() {
         return (
             <div className={this.state.authorized? 'hidden' : ''}>
-                <form>
-                <input type="text" name="username" value={this.state.username} onChange={this.handleUpdate}/>
-                <input type="password" name="password" value={this.state.password} onChange={this.handleUpdate}/>
-                <input type="button" name="loginButton" value="Login" onClick={this.handleSubmit}/>
+
+                <nav className="navbar navbar-inverse">
+                    <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <div class="container-fluid">
+
+                            <a href="#" className="navbar-brand"
+                                name="loginButton" onClick={this.handleSubmit}>Login</a>
+
+                              <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                                  <form className="navbar-form navbar-left" role="search">
+                                    <div className="form-group">
+                                        <input className="form-control" type="text" id="inputUsername" placeholder="Username"
+                                            name="username" value={this.state.username} onChange={this.handleUpdate}/>
+                                        <input className="form-control" type="password" id="inputPassword" placeholder="Password"
+                                            name="password" value={this.state.password} onChange={this.handleUpdate}/>
+                                    </div>
+                                  </form>
+                              </div>
+
+
+                        </div>
+                    </div>
+                </nav>
+
+                <form className="form-horizontal">
+                    <fieldset>
+
+                    </fieldset>
                 </form>
             </div>
         );
@@ -190,32 +214,34 @@ var List = React.createClass({
             );
         }.bind(this));
         return (
-            <div>
+            <div >
 
-            <nav className="navbar navbar-inverse">
-                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                    <div class="container-fluid">
-                          <a href="#" className="navbar-brand"
-                            name="addItem" onClick={this.props.addItem}>Add</a>
+                <nav className={this.props.visible? "navbar navbar-inverse": 'hidden'}>
+                    <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <div class="container-fluid">
+                              <a href="#" className="navbar-brand"
+                                name="addItem" onClick={this.props.addItem}>Add</a>
 
-                          <FilteringModal modalId="filterModal" handleFilterChange={this.handleFilterChange}></FilteringModal>
-                          <a href="#" className="navbar-brand"
-                            name="toggleFilter" data-toggle="modal" data-target="#filterModal">Filter</a>
+                              <FilteringModal modalId="filterModal" handleFilterChange={this.handleFilterChange}></FilteringModal>
+                              <a href="#" className="navbar-brand"
+                                name="toggleFilter" data-toggle="modal" data-target="#filterModal">Filter</a>
 
 
-                          <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                              <form className="navbar-form navbar-left" role="search">
-                                <div className="form-group">
-                                  <input type="number" name="limit" onBlur={this.handleLimitChange} className="form-control" placeholder="Limit"/>
-                                </div>
-                              </form>
-                          </div>
+                              <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                                  <form className="navbar-form navbar-left" role="search">
+                                    <div className="form-group">
+                                      <input type="number" name="limit" onBlur={this.handleLimitChange} className="form-control" placeholder="Limit"/>
+                                    </div>
+                                  </form>
+                              </div>
+                        </div>
                     </div>
+                </nav>
+                <div className={this.props.visible? "": 'hidden'}>
+                    <h2 className={this.props.sum > this.state.limit? 'limit_red': 'limit_green'}> Sum: {this.props.sum} </h2>
+                    <p></p>
                 </div>
-            </nav>
-                <h2 className={this.props.sum > this.state.limit? 'limit_red': 'limit_green'}> Sum: {this.props.sum} </h2>
-                <p></p>
-                <div className="bs-component">
+                <div className={this.props.visible? "bs-component": 'hidden'}>
                     <table className="table table-striped table-hover">
                         <thead>
                             <tr>
@@ -249,7 +275,7 @@ var ListItem = React.createClass({
                 <td>{this.props.data.cost}</td>
                 <td>
                     <a href="#" className="btn btn-lg btn-success"
-                        name="edit" data-toggle="modal" data-target={'#basicModal' + this.props.data.id}>edit</a>
+                        name="edit" data-toggle="modal" data-target={'#listItem' + this.props.data.id}>edit</a>
                     <ListItemEditingModal
                         data={this.props.data}
                         updateItem={this.props.updateItem}/>
@@ -277,7 +303,7 @@ var ListItemEditingModal = React.createClass({
     },
     render: function() {
         return (
-            <div className="modal" id={'basicModal' + this.props.data.id} tabIndex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+            <div className="modal" id={'listItem' + this.props.data.id} tabIndex="-1" role="dialog" aria-labelledby="listItem" aria-hidden="true">
                 <div className="modal-dialog">
                     <div className="modal-content">
                         <div className="modal-body">
@@ -342,7 +368,7 @@ var ListItemEditingModal = React.createClass({
 var FilteringModal = React.createClass({
     render: function() {
         return (
-            <div className="modal" id={this.props.modalId} tabIndex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+            <div className="modal" id={this.props.modalId} tabIndex="-1" role="dialog" aria-labelledby="filteringModal" aria-hidden="true">
                 <div className="modal-dialog">
                     <div className="modal-content">
                         <div className="modal-body">
