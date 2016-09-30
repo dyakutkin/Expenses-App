@@ -15,7 +15,6 @@ var App = React.createClass( {
 var LoginView = React.createClass({
     getInitialState: function() {
         return {
-            url: '/login/',
             authorized: false
         };
     },
@@ -24,18 +23,18 @@ var LoginView = React.createClass({
         targetState[e.target.name] = e.target.value;
         this.setState(targetState);
     },
-    authorize: function(userId) {
-        this.setState({authorized: true});
-        this.props.handleLogin(userId);
-    },
-    componentDidMount: function() {
+    authorize: function() {
         $.ajax({
-            url: '/login/',
+            url: '/auth/user/',
             type: 'GET',
             success: function(result) {
-                this.authorize(result.id);
+                this.setState({authorized: true});
+                this.props.handleLogin(result.id);
             }.bind(this)
         });
+    },
+    componentDidMount: function() {
+        this.authorize();
     },
     handleSubmit: function() {
         $.ajax({
@@ -46,13 +45,13 @@ var LoginView = React.createClass({
             beforeSend: function(xhr) {
                 xhr.setRequestHeader('X-CSRFToken', readCookie('csrftoken'));
             }.bind(this),
-            url: this.state.url,
+            url: '/auth/login/',
             type: 'POST',
             data: this.state,
             success: function(result) {
-                this.authorize(result.id);
+                this.authorize();
             }.bind(this),
-        });
+        }).then();
     },
     render: function() {
         return (

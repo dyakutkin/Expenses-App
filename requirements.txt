@@ -3,6 +3,8 @@ backports.shutil-get-terminal-size==1.0.0
 decorator==4.0.10
 Django==1.10.1
 djangorestframework==3.4.6
+django-allauth==0.27.0
+django-rest-auth==0.8.1
 psycopg2==2.6.2
 invoke==0.13.0
 ipython==5.1.0
