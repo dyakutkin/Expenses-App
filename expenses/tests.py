@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth.models import User, Group
 
 from rest_framework.test import APITestCase
@@ -12,6 +14,9 @@ from selenium.webdriver.common.by import By
 
 from expenses.models import Expense
 from expenses.serializers import ExpenseSerializer
+
+
+TESTING_ENTRYPOINT_URL = os.getenv('TESTING_ENTRYPOINT_URL', 'http://localhost:3000/')
 
 
 class ItemsAPITestCase(APITestCase):
@@ -215,7 +220,7 @@ class UsersAPITestCase(APITestCase):
 
 @unittest.skip("E2E testing environment is not configured yet")
 class E2ETestCase(APITestCase):
-    app_link = 'http://localhost:3000/'
+    app_link = TESTING_ENTRYPOINT_URL
     username = 'user'
     password = 'Auph2Aad'
 

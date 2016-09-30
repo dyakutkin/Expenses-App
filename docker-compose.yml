@@ -28,4 +28,5 @@ django:
     - "9000:9000"
   environment:
     - DJANGO_SETTINGS_MODULE=expenses-app.settings
+    - TESTING_ENTRYPOINT_URL=http://localhost:3000/
   command: /bin/bash -c "cd /web && pip install -r requirements.txt && exec invoke run_dev"
