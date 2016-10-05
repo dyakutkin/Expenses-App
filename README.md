@@ -15,6 +15,7 @@ Make sure you have installed Docker.
 - ```git clone https://github.com/dmitry-yakutkin/Expenses-App```
 - ```cd Expenses-App```
 - ```docker-compose up```
+
 Application is now available on port 3000.
 
 ## Standard users credentials
